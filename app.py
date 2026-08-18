@@ -63,7 +63,19 @@ def get_all_indices():
             timeout=60
         )
 
-        data = response.json()
+        try:
+            data = response.json()
+
+        except Exception as e:
+
+            st.error(
+                f"API returned non-JSON response. "
+                f"Status Code: {response.status_code}"
+            )
+
+            st.code(response.text[:1000])
+
+            return pd.DataFrame()
 
         indices = sorted(
             list(
