@@ -178,11 +178,15 @@ def get_nifty_tri(index_name, start_date, end_date):
         "X-Requested-With": "XMLHttpRequest"
     }
 
-    session.get(
-        "https://www.niftyindices.com/reports/historical-data",
-        headers=headers,
-        verify=False
+    try:
+        session.get(
+            "https://www.niftyindices.com/reports/historical-data",
+            headers=headers,
+            verify=False,
+            timeout=30
     )
+    except Exception:
+        pass
 
     payload = {
         "cinfo": (
@@ -277,9 +281,20 @@ def get_nifty_valuation(index_name, start_date, end_date):
         format="%d %b %Y"
     )
 
-    df["pe"] = pd.to_numeric(df["pe"])
-    df["pb"] = pd.to_numeric(df["pb"])
-    df["divYield"] = pd.to_numeric(df["divYield"])
+    df["pe"] = pd.to_numeric(
+        df["pe"],
+        errors="coerce"
+    )
+
+    df["pb"] = pd.to_numeric(
+        df["pb"],
+        errors="coerce"
+    )
+
+    df["divYield"] = pd.to_numeric(
+        df["divYield"],
+        errors="coerce"
+    )
 
     return df.sort_values("DATE")
 
@@ -365,6 +380,8 @@ if st.button("Download Data"):
 
                     all_tri.append(df)
 
+                    time.sleep(0.7)
+
                     progress.progress(
                         (i + 1) / len(selected_indices)
                     )
@@ -408,6 +425,8 @@ if st.button("Download Data"):
                         start_date.strftime("%d-%b-%Y"),
                         end_date.strftime("%d-%b-%Y")
                     )
+
+                    time.sleep(0.7)
 
                     if len(val_df) == 0:
                         continue
